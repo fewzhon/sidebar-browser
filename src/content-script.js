@@ -146,6 +146,17 @@ class SidebarBrowser {
                 display: flex;
             }
             
+            /* Adjust main browser content when sidebar is visible */
+            body.sidebar-visible {
+                margin-right: ${this.settings.sidebarWidth}px !important;
+                transition: margin-right 0.3s ease;
+            }
+            
+            /* Ensure main content doesn't get hidden behind sidebar */
+            body.sidebar-visible * {
+                max-width: calc(100vw - ${this.settings.sidebarWidth}px) !important;
+            }
+            
             .sidebar-header {
                 background: #f8f9fa;
                 border-bottom: 1px solid #ddd;
@@ -198,6 +209,7 @@ class SidebarBrowser {
                 height: 100%;
                 border: none;
                 background: #ffffff;
+                display: block;
             }
             
             .sidebar-loading {
@@ -371,6 +383,7 @@ class SidebarBrowser {
     showSidebar() {
         this.isVisible = true;
         this.sidebar.classList.add('visible');
+        document.body.classList.add('sidebar-visible');
         chrome.storage.local.set({ sidebarVisible: true });
         
         // Load default page if no current URL
@@ -382,6 +395,7 @@ class SidebarBrowser {
     hideSidebar() {
         this.isVisible = false;
         this.sidebar.classList.remove('visible');
+        document.body.classList.remove('sidebar-visible');
         chrome.storage.local.set({ sidebarVisible: false });
     }
     
@@ -445,6 +459,11 @@ class SidebarBrowser {
         this.loadingElement.style.display = 'none';
         this.errorElement.style.display = 'none';
         this.iframe.style.display = 'block';
+        
+        // Ensure iframe is visible and properly sized
+        this.iframe.style.width = '100%';
+        this.iframe.style.height = '100%';
+        this.iframe.style.border = 'none';
     }
     
     onFrameError() {
@@ -524,6 +543,9 @@ class SidebarBrowser {
             
             this.sidebar.style.width = newWidth + 'px';
             this.settings.sidebarWidth = newWidth;
+            
+            // Update body margin during resize
+            document.body.style.marginRight = newWidth + 'px';
         });
         
         document.addEventListener('mouseup', () => {
