@@ -66,6 +66,34 @@
                 </button>
             </section>
             
+            <!-- Sidebar Mode Settings -->
+            <section class="settings-section">
+                <h2>Sidebar Mode</h2>
+                <p class="section-description">Choose between native Chrome sidebar and content script injection</p>
+                
+                <div class="setting-group">
+                    <label class="radio-label">
+                        <input type="radio" name="sidebarMode" id="contentScriptMode" value="contentScript" class="radio">
+                        <span class="radio-custom"></span>
+                        <div class="radio-content">
+                            <strong>Content Script Mode (Recommended)</strong>
+                            <p class="help-text">Injects sidebar directly into web pages. Works with 100% of websites, including Google, GitHub, Stack Overflow, etc. Provides true split-screen experience.</p>
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="setting-group">
+                    <label class="radio-label">
+                        <input type="radio" name="sidebarMode" id="nativeSidePanelMode" value="nativeSidePanel" class="radio">
+                        <span class="radio-custom"></span>
+                        <div class="radio-content">
+                            <strong>Native Side Panel Mode</strong>
+                            <p class="help-text">Uses Chrome's native side panel API. Limited to ~10% of websites due to iframe restrictions. Only works with sites like Wikipedia, Twitter, etc.</p>
+                        </div>
+                    </label>
+                </div>
+            </section>
+            
             <!-- Behavior Settings -->
             <section class="settings-section">
                 <h2>Behavior</h2>

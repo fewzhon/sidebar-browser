@@ -5,6 +5,7 @@
   "description": "A lightweight mini-browser in Chrome's side panel with intelligent search integration",
   
   "permissions": [
+    "sidePanel",
     "contextMenus",
     "storage",
     "activeTab",
@@ -19,6 +20,10 @@
   
   "background": {
     "service_worker": "src/background.js"
+  },
+  
+  "side_panel": {
+    "default_path": "src/sidepanel/panel.html"
   },
   
   "content_scripts": [

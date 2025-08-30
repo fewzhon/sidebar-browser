@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Browser</title>
+    <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+    <div class="sidebar-container">
+        <div class="sidebar-header">
+            <div class="sidebar-controls">
+                <button id="sidebar-back" class="sidebar-btn" title="Back">←</button>
+                <button id="sidebar-forward" class="sidebar-btn" title="Forward">→</button>
+                <button id="sidebar-refresh" class="sidebar-btn" title="Refresh">↻</button>
+                <button id="sidebar-close" class="sidebar-btn" title="Close">×</button>
+            </div>
+            <div class="sidebar-address-bar">
+                <input type="text" id="sidebar-url-input" placeholder="Enter URL or search...">
+                <button id="sidebar-go" class="sidebar-btn">Go</button>
+            </div>
+        </div>
+        
+        <div class="sidebar-content">
+            <div id="sidebar-loading" class="sidebar-loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Loading...</p>
+            </div>
+            <div id="sidebar-error" class="sidebar-error" style="display: none;">
+                <h3>Unable to load page</h3>
+                <p>This page cannot be displayed in the sidebar due to security restrictions.</p>
+                <button id="sidebar-open-new-tab" class="sidebar-btn">Open in New Tab</button>
+            </div>
+            <iframe id="sidebar-iframe" class="sidebar-iframe" style="display: none;"></iframe>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="sidebar-search">
+                <input type="text" id="sidebar-search-input" placeholder="Search...">
+                <button id="sidebar-search-btn" class="sidebar-btn">Search</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="panel.js"></script>
+</body>
+</html>

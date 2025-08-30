@@ -1,4 +1,7 @@
 // Background service worker for Sidebar Browser extension
+// Supports both native sidePanel API and content script injection modes
+
+let useNativeSidePanel = false; // Toggle between modes
 
 // Initialize extension on startup
 chrome.runtime.onStartup.addListener(() => {
@@ -26,7 +29,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       keyboardShortcuts: {
         toggleSidebar: 'Ctrl+Shift+S',
         searchInSidebar: 'Ctrl+Shift+F'
-      }
+      },
+      useNativeSidePanel: false // Default to content script mode
     });
     
     console.log('Sidebar Browser extension installed');
@@ -34,6 +38,11 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   
   // Create context menu
   createContextMenu();
+  
+  // Load user preference for sidebar mode
+  chrome.storage.sync.get({ useNativeSidePanel: false }, (result) => {
+    useNativeSidePanel = result.useNativeSidePanel;
+  });
 });
 
 // Create context menu for "Open in Sidebar"
@@ -55,30 +64,50 @@ function createContextMenu() {
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'openInSidebar') {
-    openInSidebar(info.linkUrl, tab.id);
+    if (useNativeSidePanel) {
+      // Use native side panel
+      chrome.sidePanel.open({ windowId: tab.windowId });
+      // Send message to native panel
+      chrome.runtime.sendMessage({ action: 'loadUrl', url: info.linkUrl });
+    } else {
+      openInSidebar(info.linkUrl, tab.id);
+    }
   } else if (info.menuItemId === 'searchInSidebar') {
-    searchInSidebar(info.selectionText, tab.id);
+    if (useNativeSidePanel) {
+      // Use native side panel
+      chrome.sidePanel.open({ windowId: tab.windowId });
+      // Send message to native panel
+      chrome.runtime.sendMessage({ action: 'search', query: info.selectionText });
+    } else {
+      searchInSidebar(info.selectionText, tab.id);
+    }
   }
 });
 
 // Handle extension icon click
 chrome.action.onClicked.addListener(async (tab) => {
-  try {
-    // Check if content script is available on this tab
-    await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
-    // If we get here, content script is available
-    chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
-  } catch (error) {
-    console.log('Content script not available on this tab, injecting...');
-    // Inject content script if not available
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ['src/content-script.js']
-    });
-    // Now try to toggle sidebar
-    setTimeout(() => {
+  if (useNativeSidePanel) {
+    // Use native side panel
+    chrome.sidePanel.open({ windowId: tab.windowId });
+  } else {
+    // Use content script injection
+    try {
+      // Check if content script is available on this tab
+      await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
+      // If we get here, content script is available
       chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
-    }, 100);
+    } catch (error) {
+      console.log('Content script not available on this tab, injecting...');
+      // Inject content script if not available
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['src/content-script.js']
+      });
+      // Now try to toggle sidebar
+      setTimeout(() => {
+        chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
+      }, 100);
+    }
   }
 });
 
@@ -108,6 +137,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: true });
       });
       return true;
+    
+    case 'setSidebarMode':
+      useNativeSidePanel = request.useNativeSidePanel;
+      chrome.storage.sync.set({ useNativeSidePanel: useNativeSidePanel });
+      break;
     
     default:
       sendResponse({ error: 'Unknown action' });
@@ -193,45 +227,51 @@ async function searchInSidebar(query, tabId) {
 chrome.commands.onCommand.addListener(async (command) => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   
-  try {
-    // Check if content script is available
-    await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
-    
-    switch (command) {
-      case 'toggle-sidebar':
-        chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
-        break;
+  if (useNativeSidePanel) {
+    // Use native side panel
+    chrome.sidePanel.open({ windowId: tab.windowId });
+  } else {
+    // Use content script injection
+    try {
+      // Check if content script is available
+      await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
       
-      case 'search-sidebar':
-        // Toggle sidebar and focus search
-        chrome.tabs.sendMessage(tab.id, { 
-          action: 'toggleSidebar',
-          focusSearch: true
-        });
-        break;
-    }
-  } catch (error) {
-    console.log('Content script not available for keyboard shortcut, injecting...');
-    // Inject content script if not available
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ['src/content-script.js']
-    });
-    // Now try the command
-    setTimeout(() => {
       switch (command) {
         case 'toggle-sidebar':
           chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
           break;
         
         case 'search-sidebar':
+          // Toggle sidebar and focus search
           chrome.tabs.sendMessage(tab.id, { 
             action: 'toggleSidebar',
             focusSearch: true
           });
           break;
       }
-    }, 100);
+    } catch (error) {
+      console.log('Content script not available for keyboard shortcut, injecting...');
+      // Inject content script if not available
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['src/content-script.js']
+      });
+      // Now try the command
+      setTimeout(() => {
+        switch (command) {
+          case 'toggle-sidebar':
+            chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
+            break;
+          
+          case 'search-sidebar':
+            chrome.tabs.sendMessage(tab.id, { 
+              action: 'toggleSidebar',
+              focusSearch: true
+            });
+            break;
+        }
+      }, 100);
+    }
   }
 });
 
