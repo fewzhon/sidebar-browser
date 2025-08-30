@@ -62,9 +62,24 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 // Handle extension icon click
-chrome.action.onClicked.addListener((tab) => {
-  // Toggle sidebar in the current tab
-  chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
+chrome.action.onClicked.addListener(async (tab) => {
+  try {
+    // Check if content script is available on this tab
+    await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
+    // If we get here, content script is available
+    chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
+  } catch (error) {
+    console.log('Content script not available on this tab, injecting...');
+    // Inject content script if not available
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['content-script.js']
+    });
+    // Now try to toggle sidebar
+    setTimeout(() => {
+      chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
+    }, 100);
+  }
 });
 
 // Handle messages from content scripts
@@ -108,11 +123,29 @@ async function openInSidebar(url, tabId) {
       return;
     }
     
-    // Send URL to content script
-    chrome.tabs.sendMessage(tabId, {
-      action: 'loadUrl',
-      url: url
-    });
+    // Check if content script is available
+    try {
+      await chrome.tabs.sendMessage(tabId, { action: 'ping' });
+      // Content script is available, send the message
+      chrome.tabs.sendMessage(tabId, {
+        action: 'loadUrl',
+        url: url
+      });
+    } catch (error) {
+      console.log('Content script not available, injecting...');
+      // Inject content script if not available
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['content-script.js']
+      });
+      // Now send the message
+      setTimeout(() => {
+        chrome.tabs.sendMessage(tabId, {
+          action: 'loadUrl',
+          url: url
+        });
+      }, 100);
+    }
     
   } catch (error) {
     console.error('Error opening URL in sidebar:', error);
@@ -127,11 +160,29 @@ async function searchInSidebar(query, tabId) {
       return;
     }
     
-    // Send search query to content script
-    chrome.tabs.sendMessage(tabId, {
-      action: 'search',
-      query: query
-    });
+    // Check if content script is available
+    try {
+      await chrome.tabs.sendMessage(tabId, { action: 'ping' });
+      // Content script is available, send the message
+      chrome.tabs.sendMessage(tabId, {
+        action: 'search',
+        query: query
+      });
+    } catch (error) {
+      console.log('Content script not available, injecting...');
+      // Inject content script if not available
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['content-script.js']
+      });
+      // Now send the message
+      setTimeout(() => {
+        chrome.tabs.sendMessage(tabId, {
+          action: 'search',
+          query: query
+        });
+      }, 100);
+    }
     
   } catch (error) {
     console.error('Error searching in sidebar:', error);
@@ -142,18 +193,45 @@ async function searchInSidebar(query, tabId) {
 chrome.commands.onCommand.addListener(async (command) => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   
-  switch (command) {
-    case 'toggle-sidebar':
-      chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
-      break;
+  try {
+    // Check if content script is available
+    await chrome.tabs.sendMessage(tab.id, { action: 'ping' });
     
-    case 'search-sidebar':
-      // Toggle sidebar and focus search
-      chrome.tabs.sendMessage(tab.id, { 
-        action: 'toggleSidebar',
-        focusSearch: true
-      });
-      break;
+    switch (command) {
+      case 'toggle-sidebar':
+        chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
+        break;
+      
+      case 'search-sidebar':
+        // Toggle sidebar and focus search
+        chrome.tabs.sendMessage(tab.id, { 
+          action: 'toggleSidebar',
+          focusSearch: true
+        });
+        break;
+    }
+  } catch (error) {
+    console.log('Content script not available for keyboard shortcut, injecting...');
+    // Inject content script if not available
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['content-script.js']
+    });
+    // Now try the command
+    setTimeout(() => {
+      switch (command) {
+        case 'toggle-sidebar':
+          chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
+          break;
+        
+        case 'search-sidebar':
+          chrome.tabs.sendMessage(tab.id, { 
+            action: 'toggleSidebar',
+            focusSearch: true
+          });
+          break;
+      }
+    }, 100);
   }
 });
 

@@ -315,6 +315,10 @@ class SidebarBrowser {
         // Listen for messages from background script
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             switch (request.action) {
+                case 'ping':
+                    // Respond to ping to confirm content script is available
+                    sendResponse({ status: 'ok' });
+                    break;
                 case 'toggleSidebar':
                     this.toggleSidebar();
                     if (request.focusSearch) {
@@ -471,8 +475,15 @@ class SidebarBrowser {
     }
 }
 
-// Initialize sidebar browser
-const sidebarBrowser = new SidebarBrowser();
-
-// Expose to window for debugging
-window.sidebarBrowser = sidebarBrowser;
+// Check if sidebar browser is already initialized to prevent duplicates
+if (!window.sidebarBrowser) {
+    // Initialize sidebar browser
+    const sidebarBrowser = new SidebarBrowser();
+    
+    // Expose to window for debugging
+    window.sidebarBrowser = sidebarBrowser;
+    
+    console.log('Sidebar Browser content script initialized');
+} else {
+    console.log('Sidebar Browser already initialized');
+}
