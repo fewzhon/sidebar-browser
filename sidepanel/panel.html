@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Browser</title>
+    <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <div class="nav-header">
+        <div class="nav-controls">
+            <button id="backBtn" class="nav-btn" title="Go back">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <button id="forwardBtn" class="nav-btn" title="Go forward">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </button>
+            <button id="refreshBtn" class="nav-btn" title="Refresh">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 4v6h6M23 20v-6h-6"/>
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="address-bar">
+            <input type="text" id="urlInput" placeholder="Enter URL or search..." />
+            <button id="goBtn" class="go-btn">Go</button>
+        </div>
+        
+        <div class="header-actions">
+            <button id="settingsBtn" class="action-btn" title="Settings">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+                </svg>
+            </button>
+            <button id="openInTabBtn" class="action-btn" title="Open in new tab">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15,3 21,3 21,9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Floating Search Bar -->
+    <div id="floatingSearch" class="floating-search hidden">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search..." />
+            <button id="searchBtn" class="search-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="content-container">
+        <div id="loadingIndicator" class="loading-indicator hidden">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+        
+        <div id="errorMessage" class="error-message hidden">
+            <div class="error-icon">⚠️</div>
+            <h3>Unable to load page</h3>
+            <p id="errorText">This page cannot be displayed in the sidebar.</p>
+            <button id="openInTabFromError" class="error-btn">Open in New Tab</button>
+        </div>
+        
+        <div id="welcomeScreen" class="welcome-screen">
+            <div class="welcome-content">
+                <h1>Sidebar Browser</h1>
+                <p>Browse the web in your sidebar</p>
+                <div class="quick-actions">
+                    <button class="quick-btn" data-url="https://www.github.com">GitHub</button>
+                    <button class="quick-btn" data-url="https://www.stackoverflow.com">Stack Overflow</button>
+                    <button class="quick-btn" data-url="https://www.wikipedia.org">Wikipedia</button>
+                    <button class="quick-btn" data-url="https://www.reddit.com">Reddit</button>
+                </div>
+                <div class="welcome-note">
+                    <p><strong>Note:</strong> Some sites (like search engines and social media) cannot be displayed in the sidebar due to security restrictions. They will open in a new tab instead.</p>
+                </div>
+            </div>
+        </div>
+        
+        <iframe id="contentFrame" class="content-frame hidden" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
+    </div>
+    
+    <!-- Hover Detection Area -->
+    <div id="hoverArea" class="hover-area"></div>
+    
+    <script src="panel.js"></script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Browser Settings</title>
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Sidebar Browser Settings</h1>
+            <p>Configure your sidebar browsing experience</p>
+        </header>
+        
+        <main class="main-content">
+            <!-- Search Engine Settings -->
+            <section class="settings-section">
+                <h2>Search Engine</h2>
+                <p class="section-description">Choose your default search engine for the floating search bar</p>
+                
+                <div class="setting-group">
+                    <label for="defaultSearchEngine">Default Search Engine:</label>
+                    <select id="defaultSearchEngine" class="setting-input">
+                        <option value="google">Google</option>
+                        <option value="bing">Bing</option>
+                        <option value="duckduckgo">DuckDuckGo</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>Search Engine URLs</h3>
+                    <p class="help-text">Customize search engine URLs. Use %s as placeholder for the search query.</p>
+                    
+                    <div class="search-engine-config">
+                        <div class="engine-row">
+                            <label for="googleUrl">Google:</label>
+                            <input type="url" id="googleUrl" class="setting-input" placeholder="https://www.google.com/search?q=" />
+                        </div>
+                        
+                        <div class="engine-row">
+                            <label for="bingUrl">Bing:</label>
+                            <input type="url" id="bingUrl" class="setting-input" placeholder="https://www.bing.com/search?q=" />
+                        </div>
+                        
+                        <div class="engine-row">
+                            <label for="duckduckgoUrl">DuckDuckGo:</label>
+                            <input type="url" id="duckduckgoUrl" class="setting-input" placeholder="https://duckduckgo.com/?q=" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Custom Search Engines -->
+            <section class="settings-section">
+                <h2>Custom Search Engines</h2>
+                <p class="section-description">Add your own search engines</p>
+                
+                <div id="customEngines" class="custom-engines">
+                    <!-- Custom engines will be dynamically added here -->
+                </div>
+                
+                <button id="addCustomEngine" class="button button-secondary">
+                    <span class="icon">+</span>
+                    Add Custom Search Engine
+                </button>
+            </section>
+            
+            <!-- Behavior Settings -->
+            <section class="settings-section">
+                <h2>Behavior</h2>
+                <p class="section-description">Configure how the sidebar browser behaves</p>
+                
+                <div class="setting-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoHideSearch" class="checkbox">
+                        <span class="checkbox-custom"></span>
+                        Auto-hide floating search bar
+                    </label>
+                    <p class="help-text">Automatically hide the search bar when not in use</p>
+                </div>
+                
+                <div class="setting-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="openLinksInSidebar" class="checkbox">
+                        <span class="checkbox-custom"></span>
+                        Open clicked links in sidebar by default
+                    </label>
+                    <p class="help-text">When enabled, most links will open in the sidebar instead of new tabs</p>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="searchDelay">Search bar hide delay (seconds):</label>
+                    <input type="number" id="searchDelay" class="setting-input" min="0" max="10" step="0.5" value="1">
+                    <p class="help-text">How long to wait before hiding the search bar</p>
+                </div>
+            </section>
+            
+            <!-- Privacy & Security -->
+            <section class="settings-section">
+                <h2>Privacy & Security</h2>
+                <p class="section-description">Manage your privacy and security settings</p>
+                
+                <div class="setting-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="clearHistoryOnClose" class="checkbox">
+                        <span class="checkbox-custom"></span>
+                        Clear browsing history when closing sidebar
+                    </label>
+                    <p class="help-text">Automatically clear sidebar browsing history</p>
+                </div>
+                
+                <div class="setting-group">
+                    <button id="clearHistory" class="button button-danger">
+                        Clear History Now
+                    </button>
+                    <p class="help-text">Remove all stored browsing history</p>
+                </div>
+            </section>
+            
+            <!-- About -->
+            <section class="settings-section">
+                <h2>About</h2>
+                <div class="about-info">
+                    <p><strong>Sidebar Browser</strong> v1.0.0</p>
+                    <p>A lightweight mini-browser for Chrome's side panel</p>
+                    <p>Created with modern web technologies and Chrome Extension APIs</p>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="footer">
+            <div class="footer-actions">
+                <button id="resetSettings" class="button button-outline">Reset to Defaults</button>
+                <button id="saveSettings" class="button button-primary">Save Settings</button>
+            </div>
+            <div id="statusMessage" class="status-message hidden"></div>
+        </footer>
+    </div>
+    
+    <!-- Custom Engine Modal -->
+    <div id="customEngineModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Custom Search Engine</h3>
+                <button id="closeModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label for="customEngineName">Name:</label>
+                    <input type="text" id="customEngineName" class="setting-input" placeholder="e.g., Stack Overflow">
+                </div>
+                <div class="setting-group">
+                    <label for="customEngineUrl">Search URL:</label>
+                    <input type="url" id="customEngineUrl" class="setting-input" placeholder="https://stackoverflow.com/search?q=%s">
+                    <p class="help-text">Use %s where the search query should be inserted</p>
+                </div>
+                <div class="setting-group">
+                    <label for="customEngineKeyword">Keyword (optional):</label>
+                    <input type="text" id="customEngineKeyword" class="setting-input" placeholder="so">
+                    <p class="help-text">Type this keyword + space in the address bar to search directly</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelCustomEngine" class="button button-outline">Cancel</button>
+                <button id="saveCustomEngine" class="button button-primary">Add Engine</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="settings.js"></script>
+</body>
+</html>

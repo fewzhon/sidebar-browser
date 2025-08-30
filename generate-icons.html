@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Generator - Sidebar Browser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .icon-preview {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .icon-size {
+            margin: 10px;
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .download-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .download-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .download-btn:hover {
+            background: #3367d6;
+        }
+        .instructions {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #4285f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sidebar Browser - Icon Generator</h1>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Click the "Generate Icons" button below</li>
+                <li>Right-click each canvas and select "Save image as..."</li>
+                <li>Save with the correct filename (e.g., icon-16.png, icon-32.png, etc.)</li>
+                <li>Place the PNG files in the <code>icons/</code> folder</li>
+            </ol>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <button id="generateBtn" class="download-btn">Generate Icons</button>
+        </div>
+
+        <div class="icon-preview">
+            <div class="icon-size">
+                <h4>16x16</h4>
+                <canvas id="canvas16" width="16" height="16"></canvas>
+            </div>
+            <div class="icon-size">
+                <h4>32x32</h4>
+                <canvas id="canvas32" width="32" height="32"></canvas>
+            </div>
+            <div class="icon-size">
+                <h4>48x48</h4>
+                <canvas id="canvas48" width="48" height="48"></canvas>
+            </div>
+            <div class="icon-size">
+                <h4>128x128</h4>
+                <canvas id="canvas128" width="128" height="128"></canvas>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <h3>Manual Download Links:</h3>
+            <p>If the canvas method doesn't work, you can manually download the icons:</p>
+            <a href="#" id="download16" class="download-btn">Download 16x16</a>
+            <a href="#" id="download32" class="download-btn">Download 32x32</a>
+            <a href="#" id="download48" class="download-btn">Download 48x48</a>
+            <a href="#" id="download128" class="download-btn">Download 128x128</a>
+        </div>
+    </div>
+
+    <script>
+        // SVG content for the icon
+        const svgContent = `
+        <svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#34a853;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            
+            <!-- Background -->
+            <rect x="8" y="8" width="112" height="112" rx="16" fill="url(#bg)" stroke="#ffffff" stroke-width="2"/>
+            
+            <!-- Side panel representation -->
+            <rect x="16" y="20" width="32" height="88" rx="4" fill="#ffffff" opacity="0.9"/>
+            
+            <!-- Browser window -->
+            <rect x="56" y="20" width="56" height="88" rx="4" fill="#ffffff" opacity="0.8"/>
+            
+            <!-- Browser tabs -->
+            <rect x="56" y="20" width="20" height="8" rx="2" fill="#e8eaed"/>
+            <rect x="78" y="20" width="20" height="8" rx="2" fill="#e8eaed"/>
+            <rect x="100" y="20" width="12" height="8" rx="2" fill="#e8eaed"/>
+            
+            <!-- Content area -->
+            <rect x="60" y="32" width="48" height="72" rx="2" fill="#f8f9fa"/>
+            
+            <!-- Search bar -->
+            <rect x="62" y="36" width="44" height="6" rx="3" fill="#e8eaed"/>
+            
+            <!-- Content lines -->
+            <rect x="62" y="48" width="40" height="2" rx="1" fill="#dadce0"/>
+            <rect x="62" y="52" width="36" height="2" rx="1" fill="#dadce0"/>
+            <rect x="62" y="56" width="42" height="2" rx="1" fill="#dadce0"/>
+            <rect x="62" y="60" width="38" height="2" rx="1" fill="#dadce0"/>
+            
+            <!-- Side panel content -->
+            <rect x="20" y="28" width="24" height="3" rx="1.5" fill="#dadce0"/>
+            <rect x="20" y="34" width="20" height="3" rx="1.5" fill="#dadce0"/>
+            <rect x="20" y="40" width="22" height="3" rx="1.5" fill="#dadce0"/>
+            <rect x="20" y="46" width="18" height="3" rx="1.5" fill="#dadce0"/>
+            
+            <!-- Search icon in side panel -->
+            <circle cx="24" cy="60" r="3" fill="none" stroke="#4285f4" stroke-width="1.5"/>
+            <line x1="26.5" y1="62.5" x2="28" y2="64" stroke="#4285f4" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>`;
+
+        function generateIcon(size) {
+            const canvas = document.getElementById(`canvas${size}`);
+            const ctx = canvas.getContext('2d');
+            
+            // Create a new image from SVG
+            const img = new Image();
+            const svgBlob = new Blob([svgContent], {type: 'image/svg+xml'});
+            const url = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                // Clear canvas
+                ctx.clearRect(0, 0, size, size);
+                
+                // Draw the SVG scaled to the canvas size
+                ctx.drawImage(img, 0, 0, size, size);
+                
+                // Create download link
+                const downloadLink = document.getElementById(`download${size}`);
+                downloadLink.onclick = function() {
+                    const link = document.createElement('a');
+                    link.download = `icon-${size}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                };
+                
+                URL.revokeObjectURL(url);
+            };
+            
+            img.src = url;
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            generateIcon(16);
+            generateIcon(32);
+            generateIcon(48);
+            generateIcon(128);
+            
+            this.textContent = 'Icons Generated!';
+            this.style.background = '#34a853';
+        });
+    </script>
+</body>
+</html> 
