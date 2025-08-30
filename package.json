@@ -21,16 +21,16 @@
     "web-browsing",
     "productivity"
   ],
-  "author": "Your Name",
+  "author": "rexgy",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/sidebar-browser.git"
+    "url": "https://github.com/rexgy/sidebar-browser.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/sidebar-browser/issues"
+    "url": "https://github.com/rexgy/sidebar-browser/issues"
   },
-  "homepage": "https://github.com/yourusername/sidebar-browser#readme",
+  "homepage": "https://github.com/rexgy/sidebar-browser#readme",
   "engines": {
     "node": ">=14.0.0"
   },
