@@ -57,6 +57,7 @@ class SidebarBrowser {
         
         // Create sidebar HTML structure
         this.sidebar.innerHTML = `
+            <div class="sidebar-resize-handle" id="sidebar-resize-handle"></div>
             <div class="sidebar-header">
                 <div class="sidebar-controls">
                     <button id="sidebar-back" class="sidebar-btn" title="Back">←</button>
@@ -120,6 +121,25 @@ class SidebarBrowser {
                 display: none;
                 flex-direction: column;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            }
+            
+            .sidebar-resize-handle {
+                position: absolute;
+                left: -5px;
+                top: 0;
+                width: 10px;
+                height: 100%;
+                cursor: ew-resize;
+                background: transparent;
+                z-index: 2147483648;
+            }
+            
+            .sidebar-resize-handle:hover {
+                background: rgba(0, 0, 0, 0.1);
+            }
+            
+            .sidebar-resize-handle:active {
+                background: rgba(0, 0, 0, 0.2);
             }
             
             .sidebar-browser-container.visible {
@@ -309,6 +329,9 @@ class SidebarBrowser {
         // Iframe events
         this.iframe.addEventListener('load', () => this.onFrameLoad());
         this.iframe.addEventListener('error', () => this.onFrameError());
+        
+        // Resize functionality
+        this.setupResizeHandle();
     }
     
     setupMessageListener() {
@@ -472,6 +495,49 @@ class SidebarBrowser {
             this.history.shift();
             this.historyIndex--;
         }
+    }
+    
+    setupResizeHandle() {
+        const resizeHandle = document.getElementById('sidebar-resize-handle');
+        let isResizing = false;
+        let startX = 0;
+        let startWidth = 0;
+        
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = this.sidebar.offsetWidth;
+            
+            // Prevent text selection during resize
+            e.preventDefault();
+            
+            // Add resize class to body
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            
+            const deltaX = startX - e.clientX;
+            const newWidth = Math.max(300, Math.min(800, startWidth + deltaX));
+            
+            this.sidebar.style.width = newWidth + 'px';
+            this.settings.sidebarWidth = newWidth;
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                
+                // Save the new width to settings
+                chrome.storage.sync.set({ sidebarWidth: this.settings.sidebarWidth });
+                
+                // Reset body styles
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+        });
     }
 }
 
