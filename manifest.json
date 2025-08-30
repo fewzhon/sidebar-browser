@@ -9,7 +9,8 @@
     "contextMenus",
     "storage",
     "activeTab",
-    "tabs"
+    "tabs",
+    "webview"
   ],
   
   "host_permissions": [
@@ -45,7 +46,7 @@
   "options_page": "settings/settings.html",
   
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; frame-src *;"
+    "extension_pages": "script-src 'self'; object-src 'self'; frame-src *; webview-src *;"
   },
   
   "commands": {

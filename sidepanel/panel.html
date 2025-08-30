@@ -93,6 +93,10 @@
             </div>
         </div>
         
+        <!-- WebView for true browser functionality -->
+        <webview id="browserView" class="content-frame hidden" webpreferences="contextIsolation=yes"></webview>
+        
+        <!-- Fallback iframe for compatible sites -->
         <iframe id="contentFrame" class="content-frame hidden" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
     </div>
     

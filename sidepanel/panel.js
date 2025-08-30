@@ -16,6 +16,7 @@ class SidebarBrowser {
         await this.loadSettings();
         this.setupEventListeners();
         this.setupFloatingSearch();
+        this.setupWebView();
         this.showWelcomeScreen();
         
         // Listen for messages from background script
@@ -90,6 +91,17 @@ class SidebarBrowser {
         const iframe = document.getElementById('contentFrame');
         iframe.addEventListener('load', () => this.onFrameLoad());
         iframe.addEventListener('error', () => this.onFrameError());
+        
+        // WebView load events
+        const webview = document.getElementById('browserView');
+        if (webview) {
+            webview.addEventListener('loadstart', () => this.onWebViewLoadStart());
+            webview.addEventListener('loadstop', () => this.onWebViewLoadStop());
+            webview.addEventListener('loadabort', () => this.onWebViewLoadAbort());
+            webview.addEventListener('consolemessage', (e) => {
+                console.log('WebView:', e.message);
+            });
+        }
     }
     
     setupFloatingSearch() {
@@ -163,6 +175,17 @@ class SidebarBrowser {
         }
     }
     
+    setupWebView() {
+        const webview = document.getElementById('browserView');
+        if (webview) {
+            // Configure webview permissions
+            webview.setAttribute('webpreferences', 'contextIsolation=yes');
+            
+            // Set initial source
+            webview.src = 'about:blank';
+        }
+    }
+    
     async loadUrl(url) {
         if (!url) return;
         
@@ -176,9 +199,23 @@ class SidebarBrowser {
         this.hideError();
         
         try {
+            // Use WebView for true browser functionality
+            const webview = document.getElementById('browserView');
             const iframe = document.getElementById('contentFrame');
             
-            // Try multiple approaches for loading the URL
+            if (webview) {
+                // Try WebView first (works with all sites)
+                const webviewSuccess = await this.loadInWebView(webview, url);
+                if (webviewSuccess) {
+                    this.currentUrl = url;
+                    this.addToHistory(url);
+                    this.updateAddressBar(url);
+                    this.updateNavigationButtons();
+                    return;
+                }
+            }
+            
+            // Fallback to iframe for compatible sites
             const loadAttempts = [
                 () => this.loadInIframe(iframe, url),
                 () => this.loadWithProxy(iframe, url),
@@ -209,6 +246,33 @@ class SidebarBrowser {
             console.error('Error loading URL:', error);
             this.showEnhancedError(url);
         }
+    }
+    
+    async loadInWebView(webview, url) {
+        return new Promise((resolve) => {
+            const handleLoadStop = () => {
+                this.hideLoading();
+                this.showWebView();
+                resolve(true);
+            };
+            
+            const handleLoadAbort = () => {
+                resolve(false);
+            };
+            
+            webview.addEventListener('loadstop', handleLoadStop, { once: true });
+            webview.addEventListener('loadabort', handleLoadAbort, { once: true });
+            
+            // Set timeout
+            const timeout = setTimeout(() => {
+                resolve(false);
+            }, 10000); // Longer timeout for WebView
+            
+            webview.src = url;
+            
+            // Clear timeout on load
+            webview.addEventListener('loadstop', () => clearTimeout(timeout), { once: true });
+        });
     }
     
     async loadInIframe(iframe, url) {
@@ -386,7 +450,12 @@ class SidebarBrowser {
     }
     
     goBack() {
-        if (this.historyIndex > 0) {
+        const webview = document.getElementById('browserView');
+        if (webview && !webview.classList.contains('hidden')) {
+            // Use WebView's built-in back functionality
+            webview.goBack();
+        } else if (this.historyIndex > 0) {
+            // Fallback to history-based navigation
             this.historyIndex--;
             const url = this.history[this.historyIndex];
             this.loadUrl(url);
@@ -394,7 +463,12 @@ class SidebarBrowser {
     }
     
     goForward() {
-        if (this.historyIndex < this.history.length - 1) {
+        const webview = document.getElementById('browserView');
+        if (webview && !webview.classList.contains('hidden')) {
+            // Use WebView's built-in forward functionality
+            webview.goForward();
+        } else if (this.historyIndex < this.history.length - 1) {
+            // Fallback to history-based navigation
             this.historyIndex++;
             const url = this.history[this.historyIndex];
             this.loadUrl(url);
@@ -402,7 +476,12 @@ class SidebarBrowser {
     }
     
     refresh() {
-        if (this.currentUrl) {
+        const webview = document.getElementById('browserView');
+        if (webview && !webview.classList.contains('hidden')) {
+            // Use WebView's built-in refresh functionality
+            webview.reload();
+        } else if (this.currentUrl) {
+            // Fallback to URL-based refresh
             this.loadUrl(this.currentUrl);
         }
     }
@@ -453,10 +532,20 @@ class SidebarBrowser {
     
     showFrame() {
         document.getElementById('contentFrame').classList.remove('hidden');
+        document.getElementById('browserView').classList.add('hidden');
     }
     
     hideFrame() {
         document.getElementById('contentFrame').classList.add('hidden');
+    }
+    
+    showWebView() {
+        document.getElementById('browserView').classList.remove('hidden');
+        document.getElementById('contentFrame').classList.add('hidden');
+    }
+    
+    hideWebView() {
+        document.getElementById('browserView').classList.add('hidden');
     }
     
     showError(message) {
@@ -519,6 +608,30 @@ class SidebarBrowser {
                 url: this.currentUrl
             });
         }
+    }
+    
+    // WebView event handlers
+    onWebViewLoadStart() {
+        this.showLoading();
+    }
+    
+    onWebViewLoadStop() {
+        this.hideLoading();
+        this.showWebView();
+        
+        // Update URL from WebView
+        const webview = document.getElementById('browserView');
+        if (webview && webview.src) {
+            this.currentUrl = webview.src;
+            this.updateAddressBar(webview.src);
+            this.addToHistory(webview.src);
+            this.updateNavigationButtons();
+        }
+    }
+    
+    onWebViewLoadAbort() {
+        this.hideLoading();
+        this.showEnhancedError(this.currentUrl);
     }
     
     // Handle frame navigation changes
