@@ -482,7 +482,10 @@ const browserPages = [
     'chrome-extension://',
     'about:',
     'edge://',
-    'moz-extension://'
+    'moz-extension://',
+    'brave://',
+    'vivaldi://',
+    'opera://'
 ];
 
 const isBrowserPage = browserPages.some(scheme => currentUrl.startsWith(scheme));
