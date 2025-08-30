@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Browser - Content Script Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .test-section h3 {
+            color: #4285f4;
+            margin-top: 0;
+        }
+        .test-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .test-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .test-link:hover {
+            background: #3367d6;
+        }
+        .test-text {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #4285f4;
+        }
+        .instructions {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .status {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .warning {
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+        }
+        .keyboard-shortcuts {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .shortcut {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            margin: 2px;
+        }
+        .feature-list {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sidebar Browser - Content Script Test</h1>
+        
+        <div class="instructions">
+            <h3>🔧 How to Test the New Content Script Version:</h3>
+            <ol>
+                <li>Make sure the Sidebar Browser extension is installed and enabled</li>
+                <li>Click the extension icon in your toolbar or use <span class="shortcut">Ctrl+Shift+S</span></li>
+                <li>The sidebar will appear on the right side of this page (not in Chrome's side panel)</li>
+                <li>Test navigation, search, and all features directly on this page</li>
+                <li>Try the keyboard shortcuts listed below</li>
+            </ol>
+        </div>
+
+        <div class="feature-list">
+            <h3>🚀 New Features (Content Script Approach):</h3>
+            <ul>
+                <li><strong>True Split-Screen:</strong> Sidebar appears on the right side of any webpage</li>
+                <li><strong>Bypass CSP Restrictions:</strong> Works with Google, GitHub, Stack Overflow, etc.</li>
+                <li><strong>Direct Integration:</strong> No iframe limitations or cross-origin issues</li>
+                <li><strong>Responsive Design:</strong> Adapts to page content and dark mode</li>
+                <li><strong>Persistent State:</strong> Remembers sidebar visibility across page loads</li>
+                <li><strong>Full Navigation:</strong> Back, forward, refresh, address bar</li>
+                <li><strong>Search Integration:</strong> Multiple search engines with context menu support</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 Test Links (Right-click to "Open in Sidebar")</h3>
+            <p><strong>These should now work with the content script approach:</strong></p>
+            <div class="test-links">
+                <a href="https://www.google.com" class="test-link">Google</a>
+                <a href="https://www.github.com" class="test-link">GitHub</a>
+                <a href="https://www.stackoverflow.com" class="test-link">Stack Overflow</a>
+                <a href="https://www.wikipedia.org" class="test-link">Wikipedia</a>
+                <a href="https://www.reddit.com" class="test-link">Reddit</a>
+                <a href="https://www.youtube.com" class="test-link">YouTube</a>
+                <a href="https://www.twitter.com" class="test-link">Twitter</a>
+                <a href="https://www.linkedin.com" class="test-link">LinkedIn</a>
+            </div>
+            <div class="status">
+                <strong>Expected Behavior:</strong> All links should now work in the sidebar without CSP errors!
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Test Search (Select text and right-click "Search in Sidebar")</h3>
+            <div class="test-text">
+                <p>Select any of these search terms and right-click to search in the sidebar:</p>
+                <ul>
+                    <li><strong>Chrome extensions development</strong></li>
+                    <li><strong>JavaScript tutorials</strong></li>
+                    <li><strong>Web development best practices</strong></li>
+                    <li><strong>CSS grid layout</strong></li>
+                    <li><strong>React hooks tutorial</strong></li>
+                </ul>
+                <p><strong>Note:</strong> Search results will now load directly in the sidebar.</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>⌨️ Keyboard Shortcuts to Test</h3>
+            <div class="keyboard-shortcuts">
+                <p><strong>Global Shortcuts:</strong></p>
+                <ul>
+                    <li><span class="shortcut">Ctrl+Shift+S</span> - Toggle sidebar browser</li>
+                    <li><span class="shortcut">Ctrl+Shift+F</span> - Toggle sidebar and focus search</li>
+                </ul>
+                
+                <p><strong>Sidebar Shortcuts (when sidebar is open):</strong></p>
+                <ul>
+                    <li><span class="shortcut">Ctrl+L</span> - Focus address bar (in sidebar)</li>
+                    <li><span class="shortcut">Ctrl+R</span> - Refresh current page (in sidebar)</li>
+                    <li><span class="shortcut">Enter</span> - Navigate to URL or search</li>
+                    <li><span class="shortcut">Escape</span> - Close sidebar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Sidebar Features Test</h3>
+            <p>Test these features in the sidebar:</p>
+            <ol>
+                <li><strong>Navigation:</strong> Use back/forward buttons and address bar</li>
+                <li><strong>Search:</strong> Use the search bar at the bottom</li>
+                <li><strong>Error Handling:</strong> Try invalid URLs or blocked sites</li>
+                <li><strong>Responsive Design:</strong> Resize browser window to see sidebar adapt</li>
+                <li><strong>Dark Mode:</strong> Switch to dark mode in your OS to see theme change</li>
+                <li><strong>Persistence:</strong> Refresh page and check if sidebar state is preserved</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Feature Checklist</h3>
+            <div id="checklist">
+                <p><input type="checkbox" id="check1"> <label for="check1">Sidebar appears on right side of page</label></p>
+                <p><input type="checkbox" id="check2"> <label for="check2">Context menu "Open in Sidebar" works</label></p>
+                <p><input type="checkbox" id="check3"> <label for="check3">Context menu "Search in Sidebar" works</label></p>
+                <p><input type="checkbox" id="check4"> <label for="check4">Keyboard shortcuts work</label></p>
+                <p><input type="checkbox" id="check5"> <label for="check5">Navigation controls work (back, forward, refresh)</label></p>
+                <p><input type="checkbox" id="check6"> <label for="check6">Address bar accepts URLs and search queries</label></p>
+                <p><input type="checkbox" id="check7"> <label for="check7">Search bar at bottom works</label></p>
+                <p><input type="checkbox" id="check8"> <label for="check8">Google loads without CSP errors</label></p>
+                <p><input type="checkbox" id="check9"> <label for="check9">GitHub loads without CSP errors</label></p>
+                <p><input type="checkbox" id="check10"> <label for="check10">Stack Overflow loads without CSP errors</label></p>
+                <p><input type="checkbox" id="check11"> <label for="check11">Sidebar state persists across page refresh</label></p>
+                <p><input type="checkbox" id="check12"> <label for="check12">Dark mode theme works</label></p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Technical Improvements</h3>
+            <div class="status">
+                <h4>What Changed:</h4>
+                <ul>
+                    <li><strong>Content Script Injection:</strong> Sidebar is injected directly into web pages</li>
+                    <li><strong>No Side Panel API:</strong> Removed dependency on Chrome's side panel API</li>
+                    <li><strong>CSP Bypass:</strong> Content script runs in page context, avoiding iframe restrictions</li>
+                    <li><strong>Better Integration:</strong> Sidebar appears as part of the page, not separate panel</li>
+                    <li><strong>Improved UX:</strong> More natural split-screen experience like Edge browser</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>⚠️ Known Limitations</h3>
+            <div class="warning">
+                <ul>
+                    <li><strong>Browser Specific:</strong> Only works in Chrome/Chromium browsers</li>
+                    <li><strong>Page Injection:</strong> Sidebar is injected into each page (may affect some sites)</li>
+                    <li><strong>Z-Index:</strong> Some sites with high z-index elements might overlap sidebar</li>
+                    <li><strong>Performance:</strong> Content script runs on every page load</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎉 Success Indicators</h3>
+            <div class="status">
+                <p><strong>✅ If everything works correctly:</strong></p>
+                <ul>
+                    <li>Sidebar appears on the right side of this page</li>
+                    <li>All test links work without CSP errors</li>
+                    <li>Search functionality works with multiple engines</li>
+                    <li>Navigation controls work properly</li>
+                    <li>Keyboard shortcuts function as expected</li>
+                    <li>Sidebar state persists across page refreshes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive features to the test page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to test links for easier testing
+            document.querySelectorAll('.test-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = this.href;
+                    
+                    // Check if sidebar is available
+                    if (window.sidebarBrowser) {
+                        window.sidebarBrowser.showSidebar();
+                        window.sidebarBrowser.loadUrl(url);
+                    } else {
+                        alert('Sidebar Browser extension not detected. Please install and enable the extension.');
+                    }
+                });
+            });
+            
+            // Add keyboard shortcut hints
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+                    console.log('Ctrl+Shift+S pressed - should toggle sidebar');
+                }
+                if (e.ctrlKey && e.shiftKey && e.key === 'F') {
+                    console.log('Ctrl+Shift+F pressed - should toggle sidebar and focus search');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

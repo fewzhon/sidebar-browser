@@ -16,7 +16,6 @@ class SidebarBrowser {
         await this.loadSettings();
         this.setupEventListeners();
         this.setupFloatingSearch();
-        this.setupTabView();
         this.showWelcomeScreen();
         
         // Listen for messages from background script
@@ -28,8 +27,6 @@ class SidebarBrowser {
                 setTimeout(() => {
                     document.getElementById('searchInput').focus();
                 }, 300);
-            } else if (request.action === 'updateTabInfo') {
-                this.updateTabInfo(request.tab);
             }
         });
     }
@@ -93,10 +90,6 @@ class SidebarBrowser {
         const iframe = document.getElementById('contentFrame');
         iframe.addEventListener('load', () => this.onFrameLoad());
         iframe.addEventListener('error', () => this.onFrameError());
-        
-        // Tab view events
-        document.getElementById('refreshTabBtn').addEventListener('click', () => this.refreshTab());
-        document.getElementById('openInMainTabBtn').addEventListener('click', () => this.openInMainTab());
     }
     
     setupFloatingSearch() {
@@ -170,12 +163,6 @@ class SidebarBrowser {
         }
     }
     
-    setupTabView() {
-        // Initialize tab view
-        this.sidebarTabId = null;
-        this.tabViewActive = false;
-    }
-    
     async loadUrl(url) {
         if (!url) return;
         
@@ -191,65 +178,37 @@ class SidebarBrowser {
         try {
             const iframe = document.getElementById('contentFrame');
             
-            // Try iframe first for compatible sites
-            const iframeSuccess = await this.loadInIframe(iframe, url);
-            if (iframeSuccess) {
-                this.currentUrl = url;
-                this.addToHistory(url);
-                this.updateAddressBar(url);
-                this.updateNavigationButtons();
-                return;
+            // Try multiple approaches for loading the URL
+            const loadAttempts = [
+                () => this.loadInIframe(iframe, url),
+                () => this.loadWithProxy(iframe, url),
+                () => this.loadWithCORS(iframe, url)
+            ];
+            
+            let success = false;
+            for (const attempt of loadAttempts) {
+                try {
+                    success = await attempt();
+                    if (success) break;
+                } catch (error) {
+                    console.log('Load attempt failed:', error.message);
+                    continue;
+                }
             }
             
-            // If iframe fails, use tab-based approach
-            const tabSuccess = await this.loadInTab(url);
-            if (tabSuccess) {
-                this.currentUrl = url;
-                this.addToHistory(url);
-                this.updateAddressBar(url);
-                this.updateNavigationButtons();
-                return;
+            if (!success) {
+                this.showEnhancedError(url);
             }
             
-            // If both fail, show error
-            this.showEnhancedError(url);
+            this.currentUrl = url;
+            this.addToHistory(url);
+            this.updateAddressBar(url);
+            this.updateNavigationButtons();
             
         } catch (error) {
             console.error('Error loading URL:', error);
             this.showEnhancedError(url);
         }
-    }
-    
-    async loadInTab(url) {
-        return new Promise((resolve) => {
-            // Create a background tab for the URL
-            chrome.tabs.create({
-                url: url,
-                active: false,
-                pinned: true
-            }, (tab) => {
-                this.sidebarTabId = tab.id;
-                this.tabViewActive = true;
-                
-                // Register tab with background script
-                chrome.runtime.sendMessage({
-                    action: 'registerSidebarTab',
-                    tabId: tab.id
-                });
-                
-                // Show tab view
-                this.hideLoading();
-                this.showTabView();
-                
-                // Update tab info
-                this.updateTabInfo({
-                    title: 'Loading...',
-                    url: url
-                });
-                
-                resolve(true);
-            });
-        });
     }
     
     async loadInIframe(iframe, url) {
@@ -427,11 +386,7 @@ class SidebarBrowser {
     }
     
     goBack() {
-        if (this.sidebarTabId && this.tabViewActive) {
-            // Use tab's built-in back functionality
-            chrome.tabs.goBack(this.sidebarTabId);
-        } else if (this.historyIndex > 0) {
-            // Fallback to history-based navigation
+        if (this.historyIndex > 0) {
             this.historyIndex--;
             const url = this.history[this.historyIndex];
             this.loadUrl(url);
@@ -439,11 +394,7 @@ class SidebarBrowser {
     }
     
     goForward() {
-        if (this.sidebarTabId && this.tabViewActive) {
-            // Use tab's built-in forward functionality
-            chrome.tabs.goForward(this.sidebarTabId);
-        } else if (this.historyIndex < this.history.length - 1) {
-            // Fallback to history-based navigation
+        if (this.historyIndex < this.history.length - 1) {
             this.historyIndex++;
             const url = this.history[this.historyIndex];
             this.loadUrl(url);
@@ -451,11 +402,7 @@ class SidebarBrowser {
     }
     
     refresh() {
-        if (this.sidebarTabId && this.tabViewActive) {
-            // Use tab's built-in refresh functionality
-            chrome.tabs.reload(this.sidebarTabId);
-        } else if (this.currentUrl) {
-            // Fallback to URL-based refresh
+        if (this.currentUrl) {
             this.loadUrl(this.currentUrl);
         }
     }
@@ -506,20 +453,10 @@ class SidebarBrowser {
     
     showFrame() {
         document.getElementById('contentFrame').classList.remove('hidden');
-        document.getElementById('tabView').classList.add('hidden');
     }
     
     hideFrame() {
         document.getElementById('contentFrame').classList.add('hidden');
-    }
-    
-    showTabView() {
-        document.getElementById('tabView').classList.remove('hidden');
-        document.getElementById('contentFrame').classList.add('hidden');
-    }
-    
-    hideTabView() {
-        document.getElementById('tabView').classList.add('hidden');
     }
     
     showError(message) {
@@ -581,28 +518,6 @@ class SidebarBrowser {
                 action: 'openTab',
                 url: this.currentUrl
             });
-        }
-    }
-    
-    // Tab management methods
-    updateTabInfo(tab) {
-        if (tab.title) {
-            document.getElementById('tabTitle').textContent = tab.title;
-        }
-        if (tab.url) {
-            document.getElementById('tabUrl').textContent = tab.url;
-        }
-    }
-    
-    refreshTab() {
-        if (this.sidebarTabId) {
-            chrome.tabs.reload(this.sidebarTabId);
-        }
-    }
-    
-    openInMainTab() {
-        if (this.currentUrl) {
-            chrome.tabs.create({ url: this.currentUrl, active: true });
         }
     }
     

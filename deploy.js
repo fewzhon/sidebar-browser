@@ -63,9 +63,7 @@ function validateFiles() {
     const requiredFiles = [
         'manifest.json',
         'background.js',
-        'sidepanel/panel.html',
-        'sidepanel/panel.js',
-        'sidepanel/panel.css',
+        'content-script.js',
         'settings/settings.html',
         'settings/settings.js',
         'settings/settings.css'
@@ -250,7 +248,7 @@ function validateManifest() {
         }
         
         // Check permissions
-        const requiredPermissions = ['sidePanel', 'contextMenus', 'storage'];
+        const requiredPermissions = ['contextMenus', 'storage'];
         const missingPermissions = requiredPermissions.filter(perm => !manifest.permissions.includes(perm));
         
         if (missingPermissions.length > 0) {

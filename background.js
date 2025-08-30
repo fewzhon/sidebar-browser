@@ -5,30 +5,6 @@ chrome.runtime.onStartup.addListener(() => {
   console.log('Sidebar Browser extension started');
 });
 
-// Track sidebar tabs
-let sidebarTabs = new Map();
-
-// Listen for tab updates
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (sidebarTabs.has(tabId) && changeInfo.status === 'complete') {
-    // Notify sidebar about tab update
-    chrome.runtime.sendMessage({
-      action: 'updateTabInfo',
-      tab: {
-        title: tab.title,
-        url: tab.url
-      }
-    });
-  }
-});
-
-// Listen for tab removal
-chrome.tabs.onRemoved.addListener((tabId) => {
-  if (sidebarTabs.has(tabId)) {
-    sidebarTabs.delete(tabId);
-  }
-});
-
 // Handle extension installation
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
@@ -77,112 +53,30 @@ function createContextMenu() {
 }
 
 // Handle context menu clicks
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'openInSidebar') {
-    try {
-      // Show sidebar with the link URL
-      await chrome.tabs.sendMessage(tab.id, { 
-        action: 'showSidebar',
-        url: info.linkUrl 
-      });
-    } catch (error) {
-      // Content script not loaded, inject it first
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['content-script.js']
-      });
-      
-      // Then show sidebar
-      setTimeout(() => {
-        chrome.tabs.sendMessage(tab.id, { 
-          action: 'showSidebar',
-          url: info.linkUrl 
-        });
-      }, 100);
-    }
+    openInSidebar(info.linkUrl, tab.id);
   } else if (info.menuItemId === 'searchInSidebar') {
-    try {
-      // Show sidebar with search query
-      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(info.selectionText)}`;
-      await chrome.tabs.sendMessage(tab.id, { 
-        action: 'showSidebar',
-        url: searchUrl 
-      });
-    } catch (error) {
-      // Content script not loaded, inject it first
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['content-script.js']
-      });
-      
-      // Then show sidebar
-      setTimeout(() => {
-        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(info.selectionText)}`;
-        chrome.tabs.sendMessage(tab.id, { 
-          action: 'showSidebar',
-          url: searchUrl 
-        });
-      }, 100);
-    }
+    searchInSidebar(info.selectionText, tab.id);
   }
 });
 
 // Handle extension icon click
-chrome.action.onClicked.addListener(async (tab) => {
-  try {
-    // Check if sidebar is already visible
-    const response = await chrome.tabs.sendMessage(tab.id, { action: 'getSidebarState' });
-    
-    if (response && response.isVisible) {
-      // Hide sidebar if already visible
-      chrome.tabs.sendMessage(tab.id, { action: 'hideSidebar' });
-    } else {
-      // Show sidebar
-      chrome.tabs.sendMessage(tab.id, { action: 'showSidebar' });
-    }
-  } catch (error) {
-    // Content script not loaded, inject it first
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ['content-script.js']
-    });
-    
-    // Then show sidebar
-    setTimeout(() => {
-      chrome.tabs.sendMessage(tab.id, { action: 'showSidebar' });
-    }, 100);
-  }
+chrome.action.onClicked.addListener((tab) => {
+  // Toggle sidebar in the current tab
+  chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
 });
 
-// Handle messages from content scripts and side panel
+// Handle messages from content scripts
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.action) {
     case 'openInSidebar':
-      // Forward to content script
-      if (sender.tab) {
-        chrome.tabs.sendMessage(sender.tab.id, {
-          action: 'showSidebar',
-          url: request.url
-        });
-      }
+      openInSidebar(request.url, sender.tab?.id);
       break;
     
     case 'searchInSidebar':
-      // Forward to content script
-      if (sender.tab) {
-        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(request.query)}`;
-        chrome.tabs.sendMessage(sender.tab.id, {
-          action: 'showSidebar',
-          url: searchUrl
-        });
-      }
+      searchInSidebar(request.query, sender.tab?.id);
       break;
-    
-    case 'getCurrentTab':
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        sendResponse({ url: tabs[0]?.url });
-      });
-      return true; // Keep message channel open for async response
     
     case 'openTab':
       chrome.tabs.create({ url: request.url });
@@ -200,25 +94,49 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
       return true;
     
-    case 'openSettings':
-      chrome.runtime.openOptionsPage();
-      break;
-    
-    case 'registerSidebarTab':
-      sidebarTabs.set(request.tabId, true);
-      sendResponse({ success: true });
-      break;
-    
     default:
       sendResponse({ error: 'Unknown action' });
   }
 });
 
-// Content script injection handles sidebar functionality
-// These functions are now replaced by content script communication
+// Function to open URL in sidebar
+async function openInSidebar(url, tabId) {
+  try {
+    // Validate URL
+    if (!url || (!url.startsWith('http://') && !url.startsWith('https://'))) {
+      console.error('Invalid URL:', url);
+      return;
+    }
+    
+    // Send URL to content script
+    chrome.tabs.sendMessage(tabId, {
+      action: 'loadUrl',
+      url: url
+    });
+    
+  } catch (error) {
+    console.error('Error opening URL in sidebar:', error);
+  }
+}
 
-// Handle side panel enable/disable
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+// Function to search in sidebar
+async function searchInSidebar(query, tabId) {
+  try {
+    if (!query || !query.trim()) {
+      console.error('Empty search query');
+      return;
+    }
+    
+    // Send search query to content script
+    chrome.tabs.sendMessage(tabId, {
+      action: 'search',
+      query: query
+    });
+    
+  } catch (error) {
+    console.error('Error searching in sidebar:', error);
+  }
+}
 
 // Handle keyboard shortcuts
 chrome.commands.onCommand.addListener(async (command) => {
@@ -226,42 +144,15 @@ chrome.commands.onCommand.addListener(async (command) => {
   
   switch (command) {
     case 'toggle-sidebar':
-      // Toggle content script sidebar
-      try {
-        const response = await chrome.tabs.sendMessage(tab.id, { action: 'getSidebarState' });
-        if (response && response.isVisible) {
-          chrome.tabs.sendMessage(tab.id, { action: 'hideSidebar' });
-        } else {
-          chrome.tabs.sendMessage(tab.id, { action: 'showSidebar' });
-        }
-      } catch (error) {
-        // Content script not loaded, inject it first
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ['content-script.js']
-        });
-        
-        setTimeout(() => {
-          chrome.tabs.sendMessage(tab.id, { action: 'showSidebar' });
-        }, 100);
-      }
+      chrome.tabs.sendMessage(tab.id, { action: 'toggleSidebar' });
       break;
     
     case 'search-sidebar':
-      // Show sidebar with search focus
-      try {
-        chrome.tabs.sendMessage(tab.id, { action: 'showSidebar' });
-      } catch (error) {
-        // Content script not loaded, inject it first
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ['content-script.js']
-        });
-        
-        setTimeout(() => {
-          chrome.tabs.sendMessage(tab.id, { action: 'showSidebar' });
-        }, 100);
-      }
+      // Toggle sidebar and focus search
+      chrome.tabs.sendMessage(tab.id, { 
+        action: 'toggleSidebar',
+        focusSearch: true
+      });
       break;
   }
 });

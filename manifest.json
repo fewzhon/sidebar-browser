@@ -5,12 +5,10 @@
   "description": "A lightweight mini-browser in Chrome's side panel with intelligent search integration",
   
   "permissions": [
-    "sidePanel",
     "contextMenus",
     "storage",
     "activeTab",
-    "tabs",
-    "scripting"
+    "tabs"
   ],
   
   "host_permissions": [
@@ -18,22 +16,17 @@
     "http://*/*"
   ],
   
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content-script.js"],
-      "css": ["content-script.css"],
-      "run_at": "document_end"
-    }
-  ],
-  
   "background": {
     "service_worker": "background.js"
   },
   
-  "side_panel": {
-    "default_path": "sidepanel/panel.html"
-  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
+      "run_at": "document_end"
+    }
+  ],
   
   "action": {
     "default_title": "Open Sidebar Browser",
