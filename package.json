@@ -25,12 +25,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rexgy/sidebar-browser.git"
+    "url": "https://github.com/fewzhon/sidebar-browser.git"
   },
   "bugs": {
-    "url": "https://github.com/rexgy/sidebar-browser/issues"
+    "url": "https://github.com/fewzhon/sidebar-browser/issues"
   },
-  "homepage": "https://github.com/rexgy/sidebar-browser#readme",
+  "homepage": "https://github.com/fewzhon/sidebar-browser#readme",
   "engines": {
     "node": ">=14.0.0"
   },
