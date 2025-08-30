@@ -73,7 +73,7 @@ chrome.action.onClicked.addListener(async (tab) => {
     // Inject content script if not available
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: ['content-script.js']
+      files: ['src/content-script.js']
     });
     // Now try to toggle sidebar
     setTimeout(() => {
@@ -136,7 +136,7 @@ async function openInSidebar(url, tabId) {
       // Inject content script if not available
       await chrome.scripting.executeScript({
         target: { tabId: tabId },
-        files: ['content-script.js']
+        files: ['src/content-script.js']
       });
       // Now send the message
       setTimeout(() => {
@@ -173,7 +173,7 @@ async function searchInSidebar(query, tabId) {
       // Inject content script if not available
       await chrome.scripting.executeScript({
         target: { tabId: tabId },
-        files: ['content-script.js']
+        files: ['src/content-script.js']
       });
       // Now send the message
       setTimeout(() => {
@@ -215,7 +215,7 @@ chrome.commands.onCommand.addListener(async (command) => {
     // Inject content script if not available
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: ['content-script.js']
+      files: ['src/content-script.js']
     });
     // Now try the command
     setTimeout(() => {
