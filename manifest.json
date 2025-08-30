@@ -27,8 +27,6 @@
       "exclude_matches": [
         "chrome://*/*",
         "chrome-extension://*/*",
-        "moz-extension://*/*",
-        "edge://*/*",
         "about:*"
       ],
       "js": ["content-script.js"],

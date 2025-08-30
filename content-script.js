@@ -475,8 +475,21 @@ class SidebarBrowser {
     }
 }
 
-// Check if sidebar browser is already initialized to prevent duplicates
-if (!window.sidebarBrowser) {
+// Check if we're on a browser page where content scripts shouldn't run
+const currentUrl = window.location.href;
+const browserPages = [
+    'chrome://',
+    'chrome-extension://',
+    'about:',
+    'edge://',
+    'moz-extension://'
+];
+
+const isBrowserPage = browserPages.some(scheme => currentUrl.startsWith(scheme));
+
+if (isBrowserPage) {
+    console.log('Skipping sidebar browser on browser page:', currentUrl);
+} else if (!window.sidebarBrowser) {
     // Initialize sidebar browser
     const sidebarBrowser = new SidebarBrowser();
     
