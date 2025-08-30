@@ -93,8 +93,25 @@
             </div>
         </div>
         
-        <!-- WebView for true browser functionality -->
-        <webview id="browserView" class="content-frame hidden" webpreferences="contextIsolation=yes"></webview>
+        <!-- Tab-based browser view -->
+        <div id="tabView" class="content-frame hidden">
+            <div class="tab-view-header">
+                <div class="tab-info">
+                    <span id="tabTitle">Loading...</span>
+                    <span id="tabUrl" class="tab-url"></span>
+                </div>
+                <div class="tab-actions">
+                    <button id="refreshTabBtn" class="tab-btn" title="Refresh">🔄</button>
+                    <button id="openInMainTabBtn" class="tab-btn" title="Open in main tab">📄</button>
+                </div>
+            </div>
+            <div id="tabContent" class="tab-content">
+                <div class="tab-loading">
+                    <div class="spinner"></div>
+                    <p>Loading page in background tab...</p>
+                </div>
+            </div>
+        </div>
         
         <!-- Fallback iframe for compatible sites -->
         <iframe id="contentFrame" class="content-frame hidden" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>

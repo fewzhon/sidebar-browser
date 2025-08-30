@@ -5,6 +5,30 @@ chrome.runtime.onStartup.addListener(() => {
   console.log('Sidebar Browser extension started');
 });
 
+// Track sidebar tabs
+let sidebarTabs = new Map();
+
+// Listen for tab updates
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (sidebarTabs.has(tabId) && changeInfo.status === 'complete') {
+    // Notify sidebar about tab update
+    chrome.runtime.sendMessage({
+      action: 'updateTabInfo',
+      tab: {
+        title: tab.title,
+        url: tab.url
+      }
+    });
+  }
+});
+
+// Listen for tab removal
+chrome.tabs.onRemoved.addListener((tabId) => {
+  if (sidebarTabs.has(tabId)) {
+    sidebarTabs.delete(tabId);
+  }
+});
+
 // Handle extension installation
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
@@ -99,6 +123,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: true });
       });
       return true;
+    
+    case 'registerSidebarTab':
+      sidebarTabs.set(request.tabId, true);
+      sendResponse({ success: true });
+      break;
     
     default:
       sendResponse({ error: 'Unknown action' });
