@@ -62,11 +62,11 @@ function validateFiles() {
     
     const requiredFiles = [
         'manifest.json',
-        'background.js',
-        'content-script.js',
-        'settings/settings.html',
-        'settings/settings.js',
-        'settings/settings.css'
+        'src/background.js',
+        'src/content-script.js',
+        'src/settings/settings.html',
+        'src/settings/settings.js',
+        'src/settings/settings.css'
     ];
     
     const missingFiles = [];
@@ -91,10 +91,10 @@ function validateIcons() {
     logStep(2, 'Checking icon files...');
     
     const requiredIcons = [
-        'icons/icon-16.png',
-        'icons/icon-32.png',
-        'icons/icon-48.png',
-        'icons/icon-128.png'
+        'src/icons/icon-16.png',
+        'src/icons/icon-32.png',
+        'src/icons/icon-48.png',
+        'src/icons/icon-128.png'
     ];
     
     const missingIcons = [];
